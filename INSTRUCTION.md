@@ -1,38 +1,26 @@
-# Kubernetes Deployment Instructions
+kind create cluster --config cluster.yml
+chmod +x bootstrap.sh
+./bootstrap.sh
 
-## 1. Create the cluster
+kubectl get pods -n mysql
 
-The Kubernetes cluster is created using Kind and the configuration from `.infrastructure/cluster.yml`.
+kubectl exec -n mysql mysql-0 -- env | grep MYSQL_
 
-Run:
+kubectl exec -n mysql mysql-0 -- ls /docker-entrypoint-initdb.d
+kubectl exec -it -n mysql mysql-0 -- mysql -uroot -p<root-password> -e "SHOW DATABASES;"
 
-```bash
-./.infrastructure/bootstrap.sh
+kubectl get pvc -n mysql
 
-```
+kubectl delete pod mysql-1 -n mysql
+kubectl get pods -n mysql -w
 
-## 2. Check all the resourses
+kubectl get pods -n <app-namespace>
+kubectl logs -n <app-namespace> deploy/<app-deployment>
 
-kubectl get all -n todoapp
-kubectl get configmap -n todoapp
-kubectl get secret -n todoapp
-kubectl get pv
-kubectl get pvc -n todoapp
-kubectl get hpa -n todoapp
-kubectl get statefulset -n todoapp
+kubectl get nodes -o wide
+curl http://localhost:30007/
 
-kubectl get pods -n todoapp -o wide
+kubectl exec -it -n mysql mysql-0 -- mysql -uroot -p<root-password> -e "SELECT * FROM <db>.<table>;"
 
-kubectl get deployment -n todoapp
-kubectl rollout status deployment/todoapp -n todoapp
+kubectl get hpa -n <app-namespace>
 
-kubectl get svc -n todoapp
-
-kubectl get hpa -n todoapp
-kubectl describe hpa -n todoapp
-
-kubectl get pvc -n todoapp
-kubectl describe pvc -n todoapp
-
-kubectl get statefulset -n todoapp
-kubectl describe statefulset -n todoapp
